@@ -7,20 +7,29 @@
 #include <stack>
 #include <stdexcept>
 #include <iomanip>
-
-#include "diplo.h"
 using namespace std;
 #define min(a,b) (((a)<(b))?(a):(b))
 #define max(a,b) (((a)>(b))?(a):(b))
 
-class GameMap {
-    map<Territory *, vector<Territory *> > landBorders;
-    map<Territory *, vector<Territory *> > coastBorders;
-
-    public:
-        void addLandEdge(Territory *a, Territory *b) {
-            
-        }
-
-
+enum Country {
+    NON,
+    ENG,
+    FRA,
+    GER,
+    ITA,
+    AUS,
+    TUR,
+    RUS
 };
+
+typedef struct Terr{
+    string name;
+    int coast;
+    Country owner;
+} Territory;
+
+typedef struct unit{
+    string name;
+    int coast;
+    Country owner;
+} Unit;

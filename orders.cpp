@@ -13,14 +13,3 @@ using namespace std;
 #define min(a,b) (((a)<(b))?(a):(b))
 #define max(a,b) (((a)>(b))?(a):(b))
 
-class GameMap {
-    map<Territory *, vector<Territory *> > landBorders;
-    map<Territory *, vector<Territory *> > coastBorders;
-
-    public:
-        void addLandEdge(Territory *a, Territory *b) {
-            
-        }
-
-
-};

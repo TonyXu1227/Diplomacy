@@ -22,14 +22,31 @@ enum Country {
     RUS
 };
 
+enum Action {
+    HOLD,
+    MOVE,
+    SUPPORT,
+    CONVOY,
+};
+
 typedef struct Terr{
     string name;
     int coast;
+    bool isSC;
+    struct Terr *group;
     Country owner;
 } Territory;
 
 typedef struct unit{
     string name;
-    int coast;
+    Territory *location;
     Country owner;
 } Unit;
+
+typedef struct order{
+    Unit source;
+    Unit aux;
+    Action act;
+    Territory *start;
+    Territory *end;
+} Order;

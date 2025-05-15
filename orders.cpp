@@ -7,8 +7,9 @@
 #include <stack>
 #include <stdexcept>
 #include <iomanip>
-
 #include "diplo.h"
+#include "orders.h"
+
 using namespace std;
 #define min(a,b) (((a)<(b))?(a):(b))
 #define max(a,b) (((a)>(b))?(a):(b))

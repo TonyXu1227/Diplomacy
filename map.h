@@ -22,6 +22,10 @@ class GameMap {
         void addLandEdge(Territory *a, Territory *b);
         //adds a water/coastal border to the map (where fleets can move)
         void addWaterEdge(Territory *a, Territory *b);
-        
 
+        bool landEdgeExists(Territory *a, Territory *b);
+
+        bool coastEdgeExists(Territory *a, Territory *b);
+
+        
 };

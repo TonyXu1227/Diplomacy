@@ -11,14 +11,20 @@ using namespace std;
 #define max(a,b) (((a)>(b))?(a):(b))
 
 int readOrders() {
-    return 0;
-}
-
-int adjudicate() {
     
     return 0;
 }
 
+int adjudicate() {
+    if (true) {
+        return 1;
+    }
+    return 0;
+}
+
 int main() {
+    cout << "adjudicating...";
+    int v = adjudicate();
+    cout << "finished adjudication!";
     return 0;
 }

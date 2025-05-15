@@ -7,8 +7,9 @@
 #include <stack>
 #include <stdexcept>
 #include <iomanip>
-
 #include "diplo.h"
+#include "map.h"
+
 using namespace std;
 #define min(a,b) (((a)<(b))?(a):(b))
 #define max(a,b) (((a)>(b))?(a):(b))
@@ -54,7 +55,7 @@ class GameMap {
             return false;
         }
 
-        
+
 
         bool isValidMove(Order *o) {
             if (o->act == HOLD) {

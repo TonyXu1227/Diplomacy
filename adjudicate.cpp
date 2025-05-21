@@ -8,7 +8,7 @@
 #include <iomanip>
 using namespace std;
 #define min(a,b) (((a)<(b))?(a):(b))
-#define max(a,b) (((a)>(b))?(a):(b))
+#define max(a,b) (((a)>(b))?(a):(b))f
 
 int readOrders() {
     
@@ -23,8 +23,11 @@ int adjudicate() {
 }
 
 int main() {
-    cout << "adjudicating...";
+    cout << "adjudicating...\n";
     int v = adjudicate();
-    cout << "finished adjudication!";
+    if (v) {
+        cout << "adjudicated\n";
+    }
+    cout << "finished adjudication!\n";
     return 0;
 }

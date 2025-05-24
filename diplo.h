@@ -28,6 +28,15 @@ enum Action {
     MOVE,
     SUPPORT,
     CONVOY,
+    RETREAT
+};
+
+enum Phase {
+    SRING_MOVE,
+    SRING_RETREAT,
+    FALL_MOVE,
+    FALL_RETREATE,
+    WINTER
 };
 
 typedef struct Terr{

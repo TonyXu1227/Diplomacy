@@ -16,6 +16,12 @@ int readOrders() {
 }
 
 int adjudicate() {
+    //make a queue of convoy orders
+    //make a queue of move orders
+    //make a queue of support orders
+    //create a list of moves and strengths for moves
+    //deteremine which ones succede
+    //cycle term
     if (true) {
         return 1;
     }

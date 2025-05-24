@@ -13,6 +13,7 @@ using namespace std;
 #define max(a,b) (((a)>(b))?(a):(b))
 
 class GameMap {
+    Phase phase;
     map<Territory *, vector<Territory *> > landBorders;
     map<Territory *, vector<Territory *> > coastBorders;
 
@@ -64,6 +65,9 @@ class GameMap {
                 
             }
             if (o->act == SUPPORT) {
+                
+            }
+            if (o->act == RETREAT) {
                 
             }
             return false;

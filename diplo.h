@@ -43,20 +43,20 @@ typedef struct Terr{
     string name;
     int coast;
     bool isSC;
-    struct Terr *group;
+    int *groupID;
     Country owner;
+    Country occupier;
 } Territory;
 
-typedef struct unit{
-    string name;
-    Territory *location;
-    Country owner;
-} Unit;
+enum Unit {
+    ARMY,
+    FLEET
+};
 
 typedef struct order{
-    Unit source;
-    Unit aux;
+    Unit type;
     Action act;
     Territory *start;
+    Territory *aux;
     Territory *end;
 } Order;

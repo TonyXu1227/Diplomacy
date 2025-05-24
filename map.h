@@ -59,16 +59,56 @@ class GameMap {
                 return true;
             }
             if (o->act == CONVOY) {
-
+                if (o->type == ARMY) {
+                    return false;
+                }
+                if (o->type == FLEET){
+                    return true;
+                }
             }
             if (o->act == MOVE) {
-                
+                if (o->type == ARMY) {
+                    if(landEdgeExists(o->start, o->end)) {
+                        return true;
+                    }
+                }
+                if (o->type == FLEET) {
+                    if(coastEdgeExists(o->start, o->end)) {
+                        return true;
+                    }
+                }
             }
             if (o->act == SUPPORT) {
-                
+                if(o->type == ARMY) {
+                    if(!landEdgeExists(o->start, o->end)) {
+                        return false;
+                    }
+                    if(!landEdgeExists(o->aux, o->end) && !coastEdgeExists(o->aux, o->end)) {
+                        return false;
+                    }
+                    return true;
+                }
+                if(o->type == FLEET) {
+                    if(!coastEdgeExists(o->start, o->end)) {
+                        return false;
+                    }
+                    if(!landEdgeExists(o->aux, o->end) && !coastEdgeExists(o->aux, o->end)) {
+                        return false;
+                    }
+                    return true;
+                }
             }
             if (o->act == RETREAT) {
-                
+                if (o->type == ARMY) {
+                    if(landEdgeExists(o->start, o->end)) {
+                        return true;
+                    }
+                }
+                if (o->type == FLEET) {
+                    if(coastEdgeExists(o->start, o->end)) {
+                        return true;
+                    }
+                }
             }
             return false;
         }

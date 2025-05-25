@@ -55,6 +55,7 @@ enum Unit {
 
 typedef struct order{
     Unit type;
+    Country player;
     Action act;
     Territory *start;
     Territory *aux;

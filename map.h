@@ -18,7 +18,15 @@ class GameMap {
     map<Territory *, vector<Territory *> > coastBorders;
 
     public:
-        //adds a land border to the map (where armies can move)
+        GameMap() {
+            cout << "Constructor called!";
+        }
+
+        ~GameMap() {
+            cout << "Destructor called!";
+        }
+
+        //adds a land border to the map (where armies can move)   
         void addLandEdge(Territory *a, Territory *b) {
             landBorders[a].push_back(b);
             landBorders[b].push_back(a);
@@ -53,8 +61,10 @@ class GameMap {
             }
             return false;
         }
-
         bool isValidMove(Order *o) {
+            if (o->player != o->start->occupier) {
+                return true;
+            }
             if (o->act == HOLD) {
                 return true;
             }

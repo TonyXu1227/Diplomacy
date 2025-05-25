@@ -6,20 +6,38 @@
 #include <stack>
 #include <stdexcept>
 #include <iomanip>
+#include "diplo.h"
+#include "orders.h"
+#include "map.h"
+
 using namespace std;
 #define min(a,b) (((a)<(b))?(a):(b))
 #define max(a,b) (((a)>(b))?(a):(b))f
 
-int readOrders() {
-    
-    return 0;
+vector<Order> readOrders() {
+    vector<Order> set;
+    return set;
 }
 
-int adjudicate() {
+int adjudicate(vector<Order> orders, GameMap map) {
     //make a queue of convoy orders
+    vector<Order> convoys;
     //make a queue of move orders
+    vector<Order> move;
     //make a queue of support orders
+    vector<Order> supports;
     //create a list of moves and strengths for moves
+    for (Order o : orders) {
+        if (o.act == CONVOY) {
+            convoys.push_back(o);
+        }
+        if (o.act == MOVE || o.act == RETREAT) {
+            move.push_back(o);
+        }
+        if (o.act == SUPPORT) {
+            move.push_back(o);
+        } 
+    }
     //deteremine which ones succede
     //cycle term
     if (true) {
@@ -30,7 +48,9 @@ int adjudicate() {
 
 int main() {
     cout << "adjudicating...\n";
-    int v = adjudicate();
+    GameMap map;
+    vector<Order> orderset = readOrders();
+    int v = adjudicate(orderset, map);
     if (v) {
         cout << "adjudicated\n";
     }

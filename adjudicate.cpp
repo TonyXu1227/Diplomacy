@@ -38,6 +38,18 @@ int adjudicate(vector<Order> orders, GameMap map) {
             move.push_back(o);
         } 
     }
+
+    for (Order o : convoys) {
+        //process convoys
+    }
+
+    for (Order o : convoys) {
+        //process moves
+    }
+
+    for (Order o : convoys) {
+        //process supports
+    }
     //deteremine which ones succede
     //cycle term
     if (true) {

@@ -90,11 +90,13 @@ class GameMap {
             }
             if (o->act == SUPPORT) {
                 if(o->type == ARMY) {
-                    if(!landEdgeExists(o->start, o->end)) {
+                    if (!landEdgeExists(o->start, o->end)) {
                         return false;
                     }
-                    if(!landEdgeExists(o->aux, o->end) && !coastEdgeExists(o->aux, o->end)) {
-                        return false;
+                    if (o->aux != NULL) {
+                        if(!landEdgeExists(o->aux, o->end) && !coastEdgeExists(o->aux, o->end)) {
+                            return false;
+                        }
                     }
                     return true;
                 }

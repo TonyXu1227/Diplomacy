@@ -20,10 +20,13 @@ vector<Order> readOrders() {
 }
 
 int adjudicate(vector<Order> orders, GameMap map) {
+    vector<Territory *> Territories = map.getTerritories();
+    int numTerr = Territories.size();
+    vector<vector<int> > moveVectors(numTerr, vector<int>(numTerr));
     //make a queue of convoy orders
     vector<Order> convoys;
     //make a queue of move orders
-    vector<Order> move;
+    vector<Order> moves;
     //make a queue of support orders
     vector<Order> supports;
     //create a list of moves and strengths for moves
@@ -32,10 +35,10 @@ int adjudicate(vector<Order> orders, GameMap map) {
             convoys.push_back(o);
         }
         if (o.act == MOVE || o.act == RETREAT) {
-            move.push_back(o);
+            moves.push_back(o);
         }
         if (o.act == SUPPORT) {
-            move.push_back(o);
+            supports.push_back(o);
         } 
     }
 
@@ -43,12 +46,22 @@ int adjudicate(vector<Order> orders, GameMap map) {
         //process convoys
     }
 
-    for (Order o : convoys) {
-        //process moves
+    for (Order o : moves) {
+        
     }
 
-    for (Order o : convoys) {
-        //process supports
+    for (Order o : supports) {
+        int endTerrID = o.end->groupID;
+        if(o.aux == NULL) {
+            if(moveVectors[endTerrID][endTerrID] != 0) {
+                moveVectors[endTerrID][endTerrID]++;
+            }
+        } else {
+            int auxTerrID = o.aux->groupID;
+            if(moveVectors[auxTerrID][endTerrID] != 0) {
+                moveVectors[endTerrID][endTerrID]++;
+            }
+        }
     }
     //deteremine which ones succede
     //cycle term

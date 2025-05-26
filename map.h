@@ -14,6 +14,7 @@ using namespace std;
 
 class GameMap {
     Phase phase;
+    vector<Territory *> Territories;
     map<Territory *, vector<Territory *> > landBorders;
     map<Territory *, vector<Territory *> > coastBorders;
 
@@ -24,6 +25,10 @@ class GameMap {
 
         ~GameMap() {
             cout << "Destructor called!";
+        }
+
+        vector<Territory *> getTerritories() {
+            return Territories;
         }
 
         //adds a land border to the map (where armies can move)   

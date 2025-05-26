@@ -43,7 +43,7 @@ typedef struct Terr{
     string name;
     int coast;
     bool isSC;
-    int *groupID;
+    int groupID;
     Country owner;
     Country occupier;
 } Territory;

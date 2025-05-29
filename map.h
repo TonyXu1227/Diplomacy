@@ -14,6 +14,7 @@ using namespace std;
 
 class GameMap {
     Phase phase;
+    int size;
     vector<Territory *> Territories;
     map<Territory *, vector<Territory *> > landBorders;
     map<Territory *, vector<Territory *> > coastBorders;
@@ -29,6 +30,10 @@ class GameMap {
 
         vector<Territory *> getTerritories() {
             return Territories;
+        }
+
+        int getSize() {
+            return size;
         }
 
         //adds a land border to the map (where armies can move)   

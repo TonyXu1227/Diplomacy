@@ -21,7 +21,7 @@ vector<Order> readOrders() {
 
 int adjudicate(vector<Order> orders, GameMap map) {
     vector<Territory *> Territories = map.getTerritories();
-    int numTerr = Territories.size();
+    int numTerr = map.getSize();
     vector<vector<int> > moveVectors(numTerr, vector<int>(numTerr));
     //make a queue of convoy orders
     vector<Order> convoys;
@@ -47,7 +47,14 @@ int adjudicate(vector<Order> orders, GameMap map) {
     }
 
     for (Order o : moves) {
-        
+        moveVectors[o.start->groupID][o.start->groupID] = 0;
+        if(map.landEdgeExists(o.start, o.end) && o.type == ARMY) {
+            moveVectors[o.start->groupID][o.end->groupID] = 1;
+        }
+        if(map.coastEdgeExists(o.start, o.end) && o.type == FLEET) {
+            moveVectors[o.start->groupID][o.end->groupID] = 1;
+        }
+        //Convoy shenanigans
     }
 
     for (Order o : supports) {
@@ -60,6 +67,30 @@ int adjudicate(vector<Order> orders, GameMap map) {
             int auxTerrID = o.aux->groupID;
             if(moveVectors[auxTerrID][endTerrID] != 0) {
                 moveVectors[endTerrID][endTerrID]++;
+            }
+        }
+    }
+    vector<int> newCoast(numTerr); //-1 if army, 0 if unoccupied.
+    vector<Country> newOcc(numTerr);
+    for(int it = 0; it < moveVectors.size(); it++) {
+        vector<int> v = moveVectors[it];
+        int maxStrength = 0;
+        int maxI = -1;
+        for(int i = 0; i < v.size(); i++) {
+            if (v[i] > maxStrength) {
+                maxI = i;
+                maxStrength = v[i];
+            }
+            if (v[i] == maxStrength) {
+                maxI = -1;
+            }
+        }
+        if(maxI != -1) {
+            for (Territory *t : Territories) {
+                if(t->groupID == maxI && t->occupier != NON) {
+                    newOcc[it] = t->occupier;
+                    newCoast[it] = t->coast;
+                }
             }
         }
     }

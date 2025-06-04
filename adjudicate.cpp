@@ -12,7 +12,7 @@
 
 using namespace std;
 #define min(a,b) (((a)<(b))?(a):(b))
-#define max(a,b) (((a)>(b))?(a):(b))f
+#define max(a,b) (((a)>(b))?(a):(b))
 
 vector<Order> readOrders() {
     vector<Order> set;

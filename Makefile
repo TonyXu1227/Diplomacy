@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall
 
-SRCS = adjudicate.cpp map.cpp orders.cpp
+SRCS = game.cpp
 
 # Object formatting
 OBJS = $(SRCS:.cpp=.o)

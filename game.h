@@ -23,4 +23,5 @@ typedef struct Order {
     int startID;
     int endID;
     int auxID;
+    int countryID;
 } order;

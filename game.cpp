@@ -12,29 +12,66 @@ using namespace std;
 #define min(a,b) (((a)<(b))?(a):(b))
 #define max(a,b) (((a)>(b))?(a):(b))
 
-int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<int>, vector<order> orders, vector<int> groupID){
+vector<int> groupID;
+vector<vector<int> > adjacencyMatrix;
+
+int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<int>,
+    vector<order> orders, vector<int> groupID, vector<vector<int> > adjacencyMatrix) {
     if(phase == 0 || phase == 2) {
-        int numTerr = (*owner).size();
+        int numTerr = (*occupiers).size();
         vector<vector<int> > moveVectors(numTerr, vector<int>(numTerr));
-        fill(moveVectors.begin(), moveVectors.end(), 0);
         
         for(int i = 0; i < numTerr; i++) {
-            moveVectors[i][i] = 1;
+            for(int j = 0; j < numTerr; j++) {
+                if (i == j) {
+                    moveVectors[i][j] = 1;
+                } else {
+                    moveVectors[i][j] = 0;
+                }
+            }
         }
-
+        
         for (order o: orders) {
+            if ((*occupiers)[o.startID] == -1) {
+                continue;
+            }
             if (o.typeID == HOLD_ID) {
-
+                //process holds
+                moveVectors[o.startID][o.startID] = 1;
             }
             if (o.typeID == MOVE_ID) {
-                moveVectors[groupID[o.startID]][groupID[o.endID]] = 1;
-                moveVectors[groupID[o.startID]][groupID[o.startID]] = 0;
+                //process moves
+                if (o.typeID == ARMY_ID && adjacencyMatrix[o.startID][o.endID] != 1) {
+                    continue;
+                }
+                if (o.typeID == FLEET_ID && adjacencyMatrix[o.startID][o.endID] != 2) {
+                    continue;
+                }
+                moveVectors[o.startID][o.endID] = 1;
+                moveVectors[o.startID][o.startID] = 0;
             }
             if (o.typeID == SUPPORT_ID) {
-
+                //process supports
+                if (adjacencyMatrix[o.startID][o.endID] == -1) {
+                    continue;
+                }
+                if(o.auxID == -1 && moveVectors[groupID[o.endID]][groupID[o.endID]] != 0) {
+                    moveVectors[o.endID][o.endID] += 1;
+                } else {
+                    if ((*occupiers)[o.auxID] < 0 && adjacencyMatrix[o.auxID][o.endID] != 1) {
+                        moveVectors[o.auxID][o.endID] += 1;
+                    }
+                    if ((*occupiers)[o.auxID] > 0 && adjacencyMatrix[o.auxID][o.endID] != 2) {
+                        moveVectors[o.auxID][o.endID] += 1;
+                    }
+                    if ((*occupiers)[o.auxID] == 0) {
+                        continue;
+                    }
+                    
+                }
             }
             if (o.typeID == CONVOY_ID) {
-                
+                //process convoys
             }
         }
         //adjudicate moves

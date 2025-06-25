@@ -15,10 +15,12 @@ using namespace std;
 vector<int> groupID;
 vector<vector<int> > adjacencyMatrix;
 
-int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner,
-    vector<order> orders, vector<int> groupID, vector<vector<int> > adjacencyMatrix, vector<int> SCmap, vector<pair<int, int> > retreats_needed) {
+//orders must be in order of convoy, move, then support, with holds at either end
+int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<order> orders, vector<int> groupID,
+    vector<vector<int> > adjacencyMatrix, vector<int> SCmap, vector<pair<int, int> > *retreats_needed) {
+    int numTerr = (*occupiers).size();
+    //move phase
     if(phase == 0 || phase == 2) {
-        int numTerr = (*occupiers).size();
         vector<vector<int> > moveVectors(numTerr, vector<int>(numTerr));
         
         for(int i = 0; i < numTerr; i++) {
@@ -53,15 +55,13 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner,
             if (o.typeID == SUPPORT_ID) {
                 //process supports
                 if (adjacencyMatrix[o.startID][o.endID] == 0) {
+                    //cout << "d";
                     continue;
                 }
                 if (o.auxID == -1) {
                     moveVectors[o.endID][o.endID] += 1;
                 } else {
-                    if ((*occupiers)[o.auxID] > 0 && adjacencyMatrix[o.auxID][o.endID] != 1) {
-                        moveVectors[o.auxID][o.endID] += 1;
-                    }
-                    if ((*occupiers)[o.auxID] < 0 && adjacencyMatrix[o.auxID][o.endID] != 2) {
+                    if ((*occupiers)[o.auxID] > 0 && moveVectors[o.auxID][o.endID] > 0) {
                         moveVectors[o.auxID][o.endID] += 1;
                     }
                     if ((*occupiers)[o.auxID] == 0) {
@@ -71,7 +71,7 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner,
                 }
             }
             if (o.typeID == CONVOY_ID) {
-                //process convoys
+                
             }
         }
 
@@ -103,9 +103,10 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner,
                             maxI = -1;
                         }
                     }
+                    // maxI is start, maxJ is end
                     if (maxI != -1 && maxI != maxJ) {
                         pair<int, int> move(maxI, maxJ);
-                        cout << maxI << " " << maxJ << "\n";
+                        //cout << maxI << " " << maxJ << "\n";
                         moves.push_back(move);
                     }
                     //cout << i << j << " " << maxI << maxJ << maxS << "\n";
@@ -120,10 +121,10 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner,
             staying[i] = true;
             newOccupiers[i] = 0;
         }
-        /*for(int i = 0; i < numTerr; i++) {
+        for(int i = 0; i < numTerr; i++) {
             for(int j = 0; j < numTerr; j++) {cout << moveVectors[i][j];}
             cout << "\n";
-        }*/
+        }
         for(int i = 0; i < moves.size(); i++) {
             bool duped = false;
             for(int j = 0; j < moves.size(); j++) {
@@ -143,13 +144,14 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner,
             staying[origin] = false;
             newOccupiers[dest] = (*occupiers)[origin];
         }
-        for (int i = 0; i < numTerr; i++) {cout << staying[i];} cout << "\n";
+        //for (int i = 0; i < numTerr; i++) {cout << staying[i];} cout << "\n";
 
         //process occupancy
         for(int i = 0; i < numTerr; i++) {
             if((*occupiers)[i] != 0 && newOccupiers[i] != (*occupiers)[i] && newOccupiers[i] != 0) {
+                //dislodge, make a retreat of form <territory, player>
                 pair<int, int> dislodge(i, (*occupiers)[i]);
-                retreats_needed.push_back(dislodge);
+                (*retreats_needed).push_back(dislodge);
                 (*occupiers)[i] = newOccupiers[i];
             } else if (!staying[i]) {
                 (*occupiers)[i] = newOccupiers[i];
@@ -164,17 +166,55 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner,
         cout << "\n";*/
         return phase + 1;
     }
+    //retreat phase
     if(phase == 1 || phase == 3) {
         int numTerr = (*owner).size();
         vector<vector<int> > moveVectors(numTerr, vector<int>(numTerr));
+        vector<int> newOccupiers (numTerr);
+        vector<int> retreatingTerr (numTerr);
+        
+        for(int i = 0; i < numTerr; i++) {
+            retreatingTerr[i] = 0;
+            newOccupiers[i] = 0;
+        }
+        for(int i = 0; i < (*retreats_needed).size(); i++) {
+            retreatingTerr[i] = (*retreats_needed)[i].second;
+        }
+
         for (order o: orders) {
             if (o.typeID == MOVE_ID) {
-
+                if((*occupiers)[o.endID] == 0 && adjacencyMatrix[o.startID][o.endID] != 0 && adjacencyMatrix[o.startID][o.endID] != 3) {
+                    moveVectors[o.startID][o.endID] = 1;
+                }
             }
         }
+
+        //determine if retreats succeed
+        for (int i = 0; i < numTerr; i++) {
+            int numMoves = 0;
+            for (int j = 0; j < numTerr; j++) {
+                if (moveVectors[j][i] != 0) {
+                    numMoves++;
+                    newOccupiers[i] = retreatingTerr[j];
+                }
+            }
+            if(numMoves > 1) {
+                newOccupiers[i] = 0;
+            }
+        }
+
+        //combine successful retreats with original map
+        for (int i = 0; i < numTerr; i++) {
+            if(newOccupiers[i] != 0) {
+                (*occupiers)[i] = newOccupiers[i];
+            }
+        }
+
         //adjudicate retreats
         return phase + 1;
     }
+
+    //build phase
     if(phase == 4) {
         for (order o: orders) {
             if (o.typeID == BUILD_ID) {
@@ -187,7 +227,33 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner,
     cout << "error encountered\n";
     return -1;
 }
+
+void printTurn(int phase, vector<int> occupiers, vector<int> owner, vector<int> groupID,
+    vector<pair<int, int> > retreats_needed) {
+    cout << "Turn: " << phase << "\n\n";
+
+    cout << "Owners:\n";
+    for (int i = 0; i < owner.size(); i++) {
+        cout << i << ": " << owner[i] << "\n";
+    }
+    cout << "\n";
+
+    cout << "Occupiers:\n";
+    for (int i = 0; i < occupiers.size(); i++) {
+        cout << i << "(" << groupID[i] << "): " << occupiers[i] << "\n";
+    }
+    cout << "\n";
+
+    cout << "Retreats:\nTerr:\tPlayer\n";
+    for(int i = 0; i < retreats_needed.size(); i++) {
+        cout << retreats_needed[i].first << " " << retreats_needed[i].second << "\n";
+    }
+
+    cout << "-----\n";
+}
+
 int main() {
+    //populate the map
     vector<int> owners(4);
     owners[0] = 1;
     owners[1] = 2;
@@ -203,10 +269,10 @@ int main() {
     vector<int> occupiers(6);
     occupiers[0] = 1;
     occupiers[1] = 0;
-    occupiers[2] = 2;
-    occupiers[3] = 0;
+    occupiers[2] = 0;
+    occupiers[3] = -2;
     occupiers[4] = 0;
-    occupiers[5] = 0;
+    occupiers[5] = 1;
     
     vector<int> groupID(6);
     groupID[0] = 0;
@@ -216,6 +282,7 @@ int main() {
     groupID[4] = 2;
     groupID[5] = 3;
 
+    //create adjacency graph
     vector<vector<int> > adjMatrix(6, vector<int> (6));
     for(int i = 0; i < 6; i++) {
         for(int j = 0; j < 6; j++) {
@@ -244,43 +311,20 @@ int main() {
     adjMatrix[4][3] = 2;
 
     adjMatrix[5][0] = 1;
-    adjMatrix[5][1] = 3;
     adjMatrix[5][2] = 1;
-    adjMatrix[5][3] = 3;
 
     int phase = 0;
 
+    //make orders
     vector<order> orders;
-    orders.push_back({MOVE_ID, ARMY_ID, 2, 5, -1, 2});
-
-    vector<pair<int, int> > retreats;
-    cout << "Turn: " << phase << "\n\n";
-
-    cout << "Owners:\n";
-    for (int i = 0; i < owners.size(); i++) {
-        cout << i << ": " << owners[i] << "\n";
-    }
-    cout << "\n";
-
-    cout << "Occupiers:\n";
-    for (int i = 0; i < occupiers.size(); i++) {
-        cout << i << "(" << groupID[i] << "): " << occupiers[i] << "\n";
-    }
-    cout << "\n";
-    cout << "done\n";
+    orders.push_back({MOVE_ID, ARMY_ID, 0, 2, -1, 2});
+    orders.push_back({SUPPORT_ID, ARMY_ID, 5, 2, 0, 2});
     
-    phase = adjudicate(phase, &occupiers, &owners, orders, groupID, adjMatrix, SCmap, retreats);
+    vector<pair<int, int> > retreats;
 
-    cout << "Turn: " << phase << "\n\n";
-    cout << "Owners:\n";
-    for (int i = 0; i < owners.size(); i++) {
-        cout << i << ": " << owners[i] << "\n";
-    }
-    cout << "\n";
-    cout << "Occupiers:\n";
-    for (int i = 0; i < occupiers.size(); i++) {
-        cout << i << "(" << groupID[i] << "): " << occupiers[i] << "\n";
-    }
-    cout << "\n";
-    cout << "done\n";
+    printTurn(phase, occupiers, owners, groupID, retreats);
+    
+    phase = adjudicate(phase, &occupiers, &owners, orders, groupID, adjMatrix, SCmap, &retreats);
+
+    printTurn(phase, occupiers, owners, groupID, retreats);
 }

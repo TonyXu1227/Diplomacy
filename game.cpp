@@ -20,7 +20,7 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<ord
     vector<vector<int> > adjacencyMatrix, vector<int> SCmap, vector<pair<int, int> > *retreats_needed) {
     int numTerr = (*occupiers).size();
     //move phase
-    if(phase == 0 || phase == 2) {
+    if(phase % 5 == 0 || phase % 5 == 2) {
         vector<vector<int> > moveVectors(numTerr, vector<int>(numTerr));
         
         for(int i = 0; i < numTerr; i++) {
@@ -148,9 +148,18 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<ord
 
         //process occupancy
         for(int i = 0; i < numTerr; i++) {
-            if((*occupiers)[i] != 0 && newOccupiers[i] != (*occupiers)[i] && newOccupiers[i] != 0) {
+            int thisocc = (*occupiers)[i];
+            int retreatID = -1;
+            for(int j = 0; j < numTerr; j++) {
+                if(groupID[i] == groupID[j] && (*occupiers)[j] != 0) {
+                    thisocc = (*occupiers)[j];
+                    retreatID = j;
+                }
+            }
+            if(thisocc != 0 && newOccupiers[i] != thisocc && newOccupiers[i] != 0) {
                 //dislodge, make a retreat of form <territory, player>
-                pair<int, int> dislodge(i, (*occupiers)[i]);
+                pair<int, int> dislodge(retreatID, thisocc);
+                (*occupiers)[retreatID] = 0;
                 (*retreats_needed).push_back(dislodge);
                 (*occupiers)[i] = newOccupiers[i];
             } else if (!staying[i]) {
@@ -167,7 +176,7 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<ord
         return phase + 1;
     }
     //retreat phase
-    if(phase == 1 || phase == 3) {
+    if(phase % 5 == 1 || phase % 5 == 3) {
         int numTerr = (*owner).size();
         vector<vector<int> > moveVectors(numTerr, vector<int>(numTerr));
         vector<int> newOccupiers (numTerr);
@@ -215,8 +224,34 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<ord
     }
 
     //build phase
-    if(phase == 4) {
+    if(phase % 5 == 4) {
+        cout << "build phase adjudicating...\n";
         for (order o: orders) {
+            map<int, int> buildDiff;
+            map<int, int> current_occ;
+            map<int, int> current_unit;
+            for(int i = 0; i < numTerr; i++) {
+                if((*occupiers)[i] != 0) {
+                    int occupier = abs((*occupiers)[i]);
+                    current_unit[occupier]++;
+                }
+                if(((*owner)[i]) != 0 && SCmap[i] != 0) {
+                    int occupier = abs((*owner)[i]);
+                    current_occ[occupier]++;
+                }
+            }
+            for(auto& i: current_unit) {
+                for(auto& j: current_occ) {
+                    if(i.first == j.first) {
+                        buildDiff[i.first] = j.second - i.second;
+                    }
+                    //check if this set of SCs is in the list of existing units
+                }
+                //check if this set of units is in the list of existing SCs
+            }
+            for (auto& i: buildDiff) {
+                //cout << i.first << ": " << i.second << "\n";
+            }
             if (o.typeID == BUILD_ID) {
 
             }
@@ -256,7 +291,7 @@ int main() {
     //populate the map
     vector<int> owners(4);
     owners[0] = 1;
-    owners[1] = 2;
+    owners[1] = 1;
     owners[2] = 0;
     owners[3] = 0;
 
@@ -270,9 +305,9 @@ int main() {
     occupiers[0] = 1;
     occupiers[1] = 0;
     occupiers[2] = 0;
-    occupiers[3] = -2;
-    occupiers[4] = 0;
-    occupiers[5] = 1;
+    occupiers[3] = -1;
+    occupiers[4] = 2;
+    occupiers[5] = 0;
     
     vector<int> groupID(6);
     groupID[0] = 0;
@@ -313,12 +348,12 @@ int main() {
     adjMatrix[5][0] = 1;
     adjMatrix[5][2] = 1;
 
-    int phase = 0;
+    int phase = 4;
 
     //make orders
     vector<order> orders;
-    orders.push_back({MOVE_ID, ARMY_ID, 0, 2, -1, 2});
-    orders.push_back({SUPPORT_ID, ARMY_ID, 5, 2, 0, 2});
+    //orders.push_back({MOVE_ID, ARMY_ID, 0, 2, -1, 2});
+    //orders.push_back({SUPPORT_ID, ARMY_ID, 5, 2, 0, 2});
     
     vector<pair<int, int> > retreats;
 

@@ -121,10 +121,10 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<ord
             staying[i] = true;
             newOccupiers[i] = 0;
         }
-        for(int i = 0; i < numTerr; i++) {
+        /*for(int i = 0; i < numTerr; i++) {
             for(int j = 0; j < numTerr; j++) {cout << moveVectors[i][j];}
             cout << "\n";
-        }
+        }*/
         for(int i = 0; i < moves.size(); i++) {
             bool duped = false;
             for(int j = 0; j < moves.size(); j++) {
@@ -226,32 +226,39 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<ord
     //build phase
     if(phase % 5 == 4) {
         cout << "build phase adjudicating...\n";
+        map<int, int> buildDiff;
+        map<int, int> current_occ;
+        map<int, int> current_unit;
+        for(int i = 0; i < numTerr; i++) {
+            if((*occupiers)[i] != 0) {
+                int occupier = abs((*occupiers)[i]);
+                current_unit[occupier]++;
+            }
+            if(((*owner)[i]) != 0 && SCmap[i] != 0) {
+                int occupier = abs((*owner)[i]);
+                current_occ[occupier]++;
+            }
+        }
+        for(auto& i: current_unit) {
+            //cout << i.first << ": " << i.second << "\n";
+            for(auto& j: current_occ) {
+                if(i.first == j.first) {
+                    buildDiff[i.first] = j.second - i.second;
+                }
+                //check if this set of SCs is in the list of existing units
+                if(current_unit.find(j.first) == current_unit.end()) {
+                    buildDiff[i.first] = j.second;
+                }
+            }
+            //check if this set of units is in the list of existing SCs
+            if(current_occ.find(i.first) == current_occ.end()) {
+                buildDiff[i.first] = 0 - i.second;
+            }
+        }
+        for (auto& i: buildDiff) {
+            cout << i.first << ": " << i.second << "\n";
+        }
         for (order o: orders) {
-            map<int, int> buildDiff;
-            map<int, int> current_occ;
-            map<int, int> current_unit;
-            for(int i = 0; i < numTerr; i++) {
-                if((*occupiers)[i] != 0) {
-                    int occupier = abs((*occupiers)[i]);
-                    current_unit[occupier]++;
-                }
-                if(((*owner)[i]) != 0 && SCmap[i] != 0) {
-                    int occupier = abs((*owner)[i]);
-                    current_occ[occupier]++;
-                }
-            }
-            for(auto& i: current_unit) {
-                for(auto& j: current_occ) {
-                    if(i.first == j.first) {
-                        buildDiff[i.first] = j.second - i.second;
-                    }
-                    //check if this set of SCs is in the list of existing units
-                }
-                //check if this set of units is in the list of existing SCs
-            }
-            for (auto& i: buildDiff) {
-                //cout << i.first << ": " << i.second << "\n";
-            }
             if (o.typeID == BUILD_ID) {
 
             }

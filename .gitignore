@@ -1,2 +1,4 @@
 *.o # all .o files
 ./* # all executables
+game.o
+diplo

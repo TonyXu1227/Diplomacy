@@ -3,6 +3,7 @@
 #include <vector>
 #include <math.h>
 #include <map>
+#include <set>
 #include <stack>
 #include <stdexcept>
 #include <iomanip>
@@ -234,14 +235,17 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<ord
                 int occupier = abs((*occupiers)[i]);
                 current_unit[occupier]++;
             }
-            if(((*owner)[i]) != 0 && SCmap[i] != 0) {
-                int occupier = abs((*owner)[i]);
+        }
+        for(int id = 0; id < (*owner).size(); id++) {
+            if(((*owner)[id]) != 0 && SCmap[id] != 0) {
+                int occupier = abs((*owner)[id]);
+                //cout << occupier << " " << id << "\n";
                 current_occ[occupier]++;
             }
         }
         for(auto& i: current_unit) {
-            //cout << i.first << ": " << i.second << "\n";
             for(auto& j: current_occ) {
+
                 if(i.first == j.first) {
                     buildDiff[i.first] = j.second - i.second;
                 }
@@ -251,16 +255,68 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<ord
                 }
             }
             //check if this set of units is in the list of existing SCs
+            //cout << i.first << i.second<<endl;
             if(current_occ.find(i.first) == current_occ.end()) {
                 buildDiff[i.first] = 0 - i.second;
             }
         }
-        for (auto& i: buildDiff) {
+        /*for (auto& i: buildDiff) {
             cout << i.first << ": " << i.second << "\n";
-        }
+        }*/
         for (order o: orders) {
             if (o.typeID == BUILD_ID) {
+                if (o.auxID > 0 && SCmap[groupID[o.startID]] == o.countryID) {
+                    if(buildDiff[o.countryID] > 0) {
+                        bool can = true;
+                        int landID = -1;
+                        for(int i = 0; i < numTerr; i++) {
+                            if(groupID[i] == groupID[o.startID]) {
+                                if(landID == -1) {
+                                    landID = i;
+                                }
+                                if ((*occupiers)[i] != 0) {
+                                    can = false;
+                                }
+                            }
+                        }
+                        if(can) {
+                            buildDiff[o.countryID]--;
+                            if(landID == o.startID) {
+                                (*occupiers)[o.startID] = o.countryID;
+                            } else {
+                                (*occupiers)[o.startID] = -1 * o.countryID;
+                            }
+                        }
+                    }
+                } else {
+                    if(buildDiff[o.countryID] < 0 && (*occupiers)[o.startID] != 0) {
+                        (*occupiers)[o.startID] = 0;
+                    }
+                }
+            }
+        }
 
+        //randomly delete undisbanded units
+        for(auto& a: buildDiff) {
+            if(a.second < 0) {
+                vector<int> unitLocations;
+                for(int i = 0; i < numTerr; i++) {
+                    if(abs((*occupiers)[i]) == a.first) {
+                        unitLocations.push_back(i);
+                    }
+                }
+                set<int> deletions;
+                for(int i = 0; i < (-1 * a.second); i++) {
+                    int m = rand() % unitLocations.size();
+                    while(deletions.find(m) != deletions.end()) {
+                        m = rand() % unitLocations.size();
+                    }
+                    deletions.insert(m);
+                }
+                for(auto m: deletions) {
+                    int loc = unitLocations[m];
+                    (*occupiers)[loc] = 0;
+                }
             }
         }
         //adjudicate builds
@@ -309,7 +365,7 @@ int main() {
     SCmap[3] = -1;
 
     vector<int> occupiers(6);
-    occupiers[0] = 1;
+    occupiers[0] = 0;
     occupiers[1] = 0;
     occupiers[2] = 0;
     occupiers[3] = -1;
@@ -359,7 +415,7 @@ int main() {
 
     //make orders
     vector<order> orders;
-    //orders.push_back({MOVE_ID, ARMY_ID, 0, 2, -1, 2});
+    orders.push_back({BUILD_ID, ARMY_ID, 1, 0, 1, 1});
     //orders.push_back({SUPPORT_ID, ARMY_ID, 5, 2, 0, 2});
     
     vector<pair<int, int> > retreats;

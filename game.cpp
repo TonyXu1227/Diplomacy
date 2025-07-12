@@ -20,6 +20,13 @@ vector<vector<int> > adjacencyMatrix;
 int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<order> orders, vector<int> groupID,
     vector<vector<int> > adjacencyMatrix, vector<int> SCmap, vector<pair<int, int> > *retreats_needed) {
     int numTerr = (*occupiers).size();
+    int numSpace = (*owner).size();
+    int totalSCs = 0;
+    for(int i = 0; i < numSpace; i++){
+        if(SCmap[i] != 0) {
+            totalSCs++;
+        }
+    }
     //move phase
     if(phase % 5 == 0 || phase % 5 == 2) {
         vector<vector<int> > moveVectors(numTerr, vector<int>(numTerr));
@@ -242,6 +249,15 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<ord
                 //cout << occupier << " " << id << "\n";
                 current_occ[occupier]++;
             }
+        }
+        int winner = -1;
+        for(auto& i: current_occ) {
+            if(i.second >= 1+totalSCs/2) {
+                winner = i.first;
+            }
+        }
+        if(winner != -1) {
+            cout << "Player " << winner << " wins!\nGG!\n";
         }
         for(auto& i: current_unit) {
             for(auto& j: current_occ) {

@@ -16,6 +16,15 @@ using namespace std;
 vector<int> groupID;
 vector<vector<int> > adjacencyMatrix;
 
+/*
+land - land: 1
+coast - coast: 2
+land - coast: 3
+water - land: 3
+coast - land: 3
+*/
+
+
 //orders must be in order of convoy, move, then support, with holds at either end
 int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<order> orders, vector<int> groupID,
     vector<vector<int> > adjacencyMatrix, vector<int> SCmap, vector<pair<int, int> > *retreats_needed) {
@@ -30,7 +39,10 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<ord
     //move phase
     if(phase % 5 == 0 || phase % 5 == 2) {
         vector<vector<int> > moveVectors(numTerr, vector<int>(numTerr));
-        
+        vector<vector<int> > addedConvoys(numTerr, vector<int>(numTerr));
+        vector<int> possibleConvoys;
+        vector<int> convoyMatrix(numTerr);
+
         for(int i = 0; i < numTerr; i++) {
             for(int j = 0; j < numTerr; j++) {
                 if (i == j && (*occupiers)[i] != 0) {
@@ -38,9 +50,31 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<ord
                 } else {
                     moveVectors[i][j] = 0;
                 }
+                addedConvoys[i][j] = 0;
+            }
+            convoyMatrix[i] = 0;
+        }
+        vector<set<int> > adjList(numTerr);
+        //create adjacency list from adjacency matrix
+        for(int i = 0; i < numTerr; i++) {
+            for(int j = 0; j < numTerr; j++) {
+                if(adjacencyMatrix[i][j] == 2 || adjacencyMatrix[i][j] == 3 ||
+                    adjacencyMatrix[j][i] == 2 || adjacencyMatrix[j][i] == 3) {
+                    adjList[i].insert(j);
+                    adjList[j].insert(i);
+                }
             }
         }
         
+        /*for(int i = 0; i < numTerr; i++) {
+            cout << i << ": ";
+            for(auto &a: adjList[i]) {
+                cout << a << " ";
+            }
+            cout << endl;
+        }*/
+
+        //process convoys only
         for (order o: orders) {
             if ((*occupiers)[o.startID] == -1) {
                 continue;
@@ -49,9 +83,40 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<ord
                 //process holds
                 moveVectors[o.startID][o.startID] = 1;
             }
+            if (o.typeID == CONVOY_ID) {
+                //process convoys
+                if (o.unitID != FLEET_ID) {
+                    continue;
+                }
+                int src = o.auxID;
+                int dest = o.endID;
+                if (src == dest) {
+                    continue;
+                }
+                bool found = false;
+                for(auto &i : possibleConvoys) {
+                    if(i == src * numTerr + dest) {
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    possibleConvoys.push_back(src * numTerr + dest);
+                }
+                int convoyID = src * numTerr + dest;
+                convoyMatrix[o.startID] = convoyID;
+            }
+        }
+        //BFS on all convoys
+        for(int i : possibleConvoys) {
+            int src = i/numTerr;
+            int dest = i%numTerr;
+        }
+
+        //process all other orders
+        for (order o: orders) {
             if (o.typeID == MOVE_ID) {
                 //process moves
-                if (o.typeID == ARMY_ID && adjacencyMatrix[o.startID][o.endID] != 1) {
+                if (o.typeID == ARMY_ID && adjacencyMatrix[o.startID][o.endID] != 1 && addedConvoys[o.startID][o.endID] != 1) {
                     continue;
                 }
                 if (o.typeID == FLEET_ID && adjacencyMatrix[o.startID][o.endID] != 2) {
@@ -77,9 +142,6 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<ord
                     }
                     
                 }
-            }
-            if (o.typeID == CONVOY_ID) {
-                
             }
         }
 
@@ -427,7 +489,7 @@ int main() {
     adjMatrix[5][0] = 1;
     adjMatrix[5][2] = 1;
 
-    int phase = 4;
+    int phase = 2;
 
     //make orders
     vector<order> orders;

@@ -5,6 +5,7 @@
 #include <map>
 #include <set>
 #include <stack>
+#include <queue>
 #include <stdexcept>
 #include <iomanip>
 #include "game.h"
@@ -110,6 +111,22 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<ord
         for(int i : possibleConvoys) {
             int src = i/numTerr;
             int dest = i%numTerr;
+            vector<int> visited(numTerr);
+            queue<int> q;
+            q.push(src);
+            while(!q.empty()) {
+                int t = q.front();
+                q.pop();
+                if(t == dest) {
+                    addedConvoys[src][dest] = 1;
+                    break;
+                }
+                for(int n : adjList[t]) {
+                    if(convoyMatrix[n] == i) {
+                        q.push(n);
+                    }
+                }
+            }
         }
 
         //process all other orders

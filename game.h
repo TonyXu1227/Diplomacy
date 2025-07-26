@@ -22,6 +22,6 @@ typedef struct Order {
     int unitID;
     int startID;
     int endID;
-    int auxID;
+    int auxID; //-1 if not used
     int countryID;
 } order;

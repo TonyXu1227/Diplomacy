@@ -77,7 +77,8 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<ord
 
         //process convoys only
         for (order o: orders) {
-            if ((*occupiers)[o.startID] == -1) {
+            //cout << (o.typeID == CONVOY_ID) << "dd\n";
+            if ((*occupiers)[o.startID] == 0) {
                 continue;
             }
             if (o.typeID == HOLD_ID) {
@@ -86,6 +87,7 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<ord
             }
             if (o.typeID == CONVOY_ID) {
                 //process convoys
+                //cout << "convoy\n";
                 if (o.unitID != FLEET_ID) {
                     continue;
                 }
@@ -102,6 +104,7 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<ord
                 }
                 if (!found) {
                     possibleConvoys.push_back(src * numTerr + dest);
+                    //cout << "added " << src << " to " << dest << "\n";
                 }
                 int convoyID = src * numTerr + dest;
                 convoyMatrix[o.startID] = convoyID;
@@ -110,7 +113,9 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<ord
         //BFS on all convoys
         for(int i : possibleConvoys) {
             int src = i/numTerr;
+            //cout << src << "\n";
             int dest = i%numTerr;
+            //cout << dest << "\n";
             vector<int> visited(numTerr);
             queue<int> q;
             q.push(src);
@@ -122,13 +127,12 @@ int adjudicate(int phase, vector<int> *occupiers, vector<int> *owner, vector<ord
                     break;
                 }
                 for(int n : adjList[t]) {
-                    if(convoyMatrix[n] == i) {
+                    if(convoyMatrix[n] == i || n == dest) {
                         q.push(n);
                     }
                 }
             }
         }
-
         //process all other orders
         for (order o: orders) {
             if (o.typeID == MOVE_ID) {
@@ -449,22 +453,22 @@ int main() {
     //populate the map
     vector<int> owners(4);
     owners[0] = 1;
-    owners[1] = 1;
+    owners[1] = 0;
     owners[2] = 0;
     owners[3] = 0;
 
     vector<int> SCmap(4);
     SCmap[0] = 1;
-    SCmap[1] = 2;
+    SCmap[1] = 0;
     SCmap[2] = 0;
     SCmap[3] = -1;
 
     vector<int> occupiers(6);
-    occupiers[0] = 0;
+    occupiers[0] = 1;
     occupiers[1] = 0;
     occupiers[2] = 0;
-    occupiers[3] = -1;
-    occupiers[4] = 2;
+    occupiers[3] = 0;
+    occupiers[4] = -1;
     occupiers[5] = 0;
     
     vector<int> groupID(6);
@@ -482,7 +486,7 @@ int main() {
             adjMatrix[i][j] = 0;
         }
     }
-    adjMatrix[0][2] = 1;
+    //adjMatrix[0][2] = 1;
     adjMatrix[0][5] = 1;
     adjMatrix[0][3] = 3;
 
@@ -490,7 +494,7 @@ int main() {
     adjMatrix[1][2] = 3;
     adjMatrix[1][4] = 2;
 
-    adjMatrix[2][0] = 1;
+    //adjMatrix[2][0] = 1;
     adjMatrix[2][5] = 1;
     adjMatrix[2][1] = 3;
 
@@ -510,7 +514,8 @@ int main() {
 
     //make orders
     vector<order> orders;
-    orders.push_back({BUILD_ID, ARMY_ID, 1, 0, 1, 1});
+    orders.push_back({CONVOY_ID, FLEET_ID, 4, 2, 0, 1});
+    orders.push_back({MOVE_ID, ARMY_ID, 0, 2, -1, 1});
     //orders.push_back({SUPPORT_ID, ARMY_ID, 5, 2, 0, 2});
     
     vector<pair<int, int> > retreats;
